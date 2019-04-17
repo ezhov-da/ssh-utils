@@ -4,14 +4,14 @@ import com.jcraft.jsch.*;
 
 import java.io.*;
 
-public class DownloadFile {
+class DownloadFile {
     private String username;
     private String host;
     private int port;
     private String pathToPrivateKey;
     private String passphrase;
 
-    public DownloadFile(String username, String host, int port, String pathToPrivateKey, String passphrase) {
+    DownloadFile(String username, String host, int port, String pathToPrivateKey, String passphrase) {
         this.username = username;
         this.host = host;
         this.port = port;
