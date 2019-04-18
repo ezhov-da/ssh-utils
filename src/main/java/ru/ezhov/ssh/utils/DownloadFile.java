@@ -33,14 +33,15 @@ class DownloadFile {
             channel = session.openChannel("sftp");
             channel.connect();
             ChannelSftp c = (ChannelSftp) channel;
-            try (BufferedInputStream inputStream = new BufferedInputStream(c.get(fileFrom), 1024)) {
-                try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(new File(fileTo)))) {
-                    byte[] buf = new byte[1024];
-                    while (inputStream.read(buf) != -1) {
-                        outputStream.write(buf);
-                    }
-                }
-            }
+			try (BufferedInputStream inputStream = new BufferedInputStream(c.get(fileFrom), 1024)) {
+				try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(new File(fileTo)))) {
+					byte[] buf = new byte[1024];
+					int read;
+					while ((read = inputStream.read(buf)) != -1) {
+						outputStream.write(buf, 0, read);
+					}
+				}
+			}
         } finally {
             if (channel != null) {
                 channel.disconnect();
