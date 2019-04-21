@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ssh-files-download-with-private-key>
+    <files>
+        <file>
+            <description>description</description>
+            <host>host</host>
+            <port>22</port>
+            <username>username</username>
+            <pathToPrivateKey>pathToPrivateKey</pathToPrivateKey>
+            <passphrase>passphrase</passphrase>
+            <fileFrom>fileFrom</fileFrom>
+            <fileTo>fileTo</fileTo>
+        </file>
+    </files>
+</ssh-files-download-with-private-key>

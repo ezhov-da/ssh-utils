@@ -1,4 +1,7 @@
-package ru.ezhov.ssh.utils;
+package ru.ezhov.ssh.utils.cli;
+
+import ru.ezhov.ssh.utils.core.SshActionFactory;
+import ru.ezhov.ssh.utils.core.SshUtilException;
 
 public class Application {
     public static void main(String[] args) {
@@ -15,11 +18,12 @@ public class Application {
             String passphrase = System.getProperty("df.passphrase");
             String fileFrom = System.getProperty("df.fileFrom");
             String fileTo = System.getProperty("df.fileTo");
-            DownloadFile downloadFile = new DownloadFile(username, host, port, privateKey, passphrase);
             try {
-                downloadFile.execute(fileFrom, fileTo);
+                SshActionFactory
+                        .downloadFileAction(username, host, port, privateKey, passphrase, fileFrom, fileTo)
+                        .perform();
                 System.out.println("Файл '" + fileFrom + "' скачан в '" + fileTo + "'");
-            } catch (Exception e) {
+            } catch (SshUtilException e) {
                 e.printStackTrace();
             }
         } else {
