@@ -5,11 +5,8 @@ import org.junit.Test;
 import ru.ezhov.ssh.utils.gui.domain.SshDownloadFile;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 @Ignore
 public class XmlConfigRepositoryIT {

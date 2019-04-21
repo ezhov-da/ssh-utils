@@ -28,6 +28,9 @@ public class Application {
                 tabbedPane.addTab("Скачивание файлов с серверов", panelSshPrivateKey);
 
                 JFrame frame = new JFrame("SSH Utils");
+
+                frame.setIconImage(new ImageIcon(Application.class.getResource("/images/ssh_16x16.png")).getImage());
+
                 frame.add(tabbedPane, BorderLayout.CENTER);
                 frame.setSize(1000, 600);
                 frame.setLocationRelativeTo(null);
