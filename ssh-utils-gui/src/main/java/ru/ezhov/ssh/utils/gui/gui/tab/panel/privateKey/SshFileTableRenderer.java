@@ -11,7 +11,8 @@ public class SshFileTableRenderer extends DefaultTableCellRenderer {
         String text = String.valueOf(value);
         switch (column) {
             case 4:
-                label.setText(text.replaceAll(".", "×"));
+            case 5:
+                label.setText("××××××");
                 break;
             default:
                 label.setText(text);
