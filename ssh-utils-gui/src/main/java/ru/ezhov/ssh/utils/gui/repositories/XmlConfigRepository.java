@@ -104,16 +104,57 @@ public class XmlConfigRepository implements ConfigRepository {
             int length = nodeList.getLength();
             for (int i = 0; i < length; i++) {
                 Node item = nodeList.item(i);
+
+                NodeList childNodes = item.getChildNodes();
+                int childNodesLength = childNodes.getLength();
+                String description = "";
+                String host = "";
+                String port = "";
+                String username = "";
+                String pathToPrivateKey = "";
+                String passphrase = "";
+                String fileFrom = "";
+                String fileTo = "";
+                for (int cn = 0; cn < childNodesLength; cn++) {
+                    Node node = childNodes.item(cn);
+                    String value = node.getTextContent().trim();
+                    switch (node.getNodeName()) {
+                        case "description":
+                            description = value;
+                            break;
+                        case "host":
+                            host = value;
+                            break;
+                        case "port":
+                            port = value;
+                            break;
+                        case "username":
+                            username = value;
+                            break;
+                        case "pathToPrivateKey":
+                            pathToPrivateKey = value;
+                            break;
+                        case "passphrase":
+                            passphrase = value;
+                            break;
+                        case "fileFrom":
+                            fileFrom = value;
+                            break;
+                        case "fileTo":
+                            fileTo = value;
+                            break;
+                    }
+                }
                 sshDownloadFiles.add(
                         new SshDownloadFile(
-                                item.getChildNodes().item(0).getTextContent(), //description
-                                item.getChildNodes().item(1).getTextContent(), //host
-                                item.getChildNodes().item(2).getTextContent(), //port
-                                item.getChildNodes().item(3).getTextContent(), //username
-                                item.getChildNodes().item(4).getTextContent(), //pathToPrivateKey
-                                item.getChildNodes().item(5).getTextContent(), //passphrase
-                                item.getChildNodes().item(6).getTextContent(), //fileFrom
-                                item.getChildNodes().item(7).getTextContent()  //fileTo
+                                description,
+                                host,
+                                port,
+                                username,
+                                pathToPrivateKey,
+                                passphrase,
+                                fileFrom,
+                                fileTo
                         )
                 );
             }
