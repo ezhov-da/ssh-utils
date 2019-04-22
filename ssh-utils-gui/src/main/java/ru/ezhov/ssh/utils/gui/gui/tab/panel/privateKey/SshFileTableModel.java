@@ -102,8 +102,6 @@ public class SshFileTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-
-
         if (aValue == null) {
             try {
                 all.remove(rowIndex);

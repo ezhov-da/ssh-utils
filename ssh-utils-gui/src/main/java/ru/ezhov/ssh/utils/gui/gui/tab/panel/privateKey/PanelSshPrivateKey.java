@@ -8,6 +8,7 @@ import ru.ezhov.ssh.utils.gui.repositories.ConfigRepositoryException;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -26,6 +27,8 @@ public class PanelSshPrivateKey extends JPanel {
         setLayout(new BorderLayout());
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitPane.setOneTouchExpandable(true);
+        splitPane.setDividerLocation(350);
         splitPane.setTopComponent(panelFiles);
         splitPane.setBottomComponent(panelFilesLog);
 
@@ -33,70 +36,33 @@ public class PanelSshPrivateKey extends JPanel {
     }
 
     private class PanelFiles extends JPanel {
+        private JToolBar toolBar;
         private JTable table;
-        private JButton buttonAdd;
-        private JButton buttonRemove;
-        private JButton buttonSave;
-        private JButton buttonReload;
         private JButton buttonExecute;
         private SshFileTableModel sshFileTableModel;
 
-        public PanelFiles() throws ConfigRepositoryException {
-            buttonAdd = new JButton("Добавить");
-            buttonRemove = new JButton("Удалить");
-            buttonReload = new JButton("Обновить список");
-            buttonSave = new JButton("Сохранить список");
-            buttonExecute = new JButton("Скачать");
+        PanelFiles() throws ConfigRepositoryException {
+            setLayout(new BorderLayout());
+            toolBar = new JToolBar();
+            buttonExecute = new JButton("Скачать", new ImageIcon(getClass().getResource("/images/inbox-download.png")));
             sshFileTableModel = new SshFileTableModel(configRepository);
             table = new JTable(sshFileTableModel);
             table.setDefaultRenderer(Object.class, new SshFileTableRenderer());
             table.setCellEditor(new DefaultCellEditor(new JTextField()));
 
-            setLayout(new BorderLayout());
             add(new JScrollPane(table), BorderLayout.CENTER);
 
             JPanel panelButtons = new JPanel();
-            panelButtons.add(buttonAdd);
-            panelButtons.add(buttonRemove);
-            panelButtons.add(buttonReload);
-            panelButtons.add(buttonSave);
             panelButtons.add(buttonExecute);
             add(panelButtons, BorderLayout.SOUTH);
 
-            buttonAdd.addActionListener(e -> {
-                SwingUtilities.invokeLater(() -> {
-                    sshFileTableModel.setValueAt(new SshDownloadFile(), sshFileTableModel.getRowCount(), 0);
-                });
-            });
+            add(toolBar, BorderLayout.NORTH);
 
-            buttonRemove.addActionListener(e -> {
-                SwingUtilities.invokeLater(() -> {
-                    int selectedRow = table.getSelectedRow();
-                    if (selectedRow != -1) {
-                        sshFileTableModel.setValueAt(null, selectedRow, 0);
-                        if (sshFileTableModel.getRowCount() > 0) {
-                            int newSelectedRow = selectedRow - 1;
-                            if (newSelectedRow < 0) {
-                                table.getSelectionModel().setSelectionInterval(0, 0);
-                            } else {
-                                table.getSelectionModel().setSelectionInterval(newSelectedRow, newSelectedRow);
-                            }
-                        }
-                    }
-                });
-            });
-
-            buttonReload.addActionListener(e -> {
-                SwingUtilities.invokeLater(() -> {
-                    sshFileTableModel.reload();
-                });
-            });
-
-            buttonSave.addActionListener(e -> {
-                SwingUtilities.invokeLater(() -> {
-                    sshFileTableModel.save();
-                });
-            });
+            toolBar.add(actionReloadTable());
+            toolBar.add(actionSaveTable());
+            toolBar.add(actionAddRow());
+            toolBar.add(actionRemoveRow());
+            toolBar.add(actionCopyRow());
 
             buttonExecute.addActionListener(e -> {
                 SwingUtilities.invokeLater(() -> {
@@ -121,6 +87,118 @@ public class PanelSshPrivateKey extends JPanel {
                     }
                 });
             });
+        }
+
+        private Action actionAddRow() {
+            return new AbstractAction() {
+                {
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Добавить строку");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Добавить строку");
+                    putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/layer--plus.png")));
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        sshFileTableModel.setValueAt(new SshDownloadFile(), sshFileTableModel.getRowCount(), 0);
+                    });
+                }
+            };
+        }
+
+        private Action actionRemoveRow() {
+            return new AbstractAction() {
+                {
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Удалить строку");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Удалить строку");
+                    putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/layer--minus.png")));
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        int selectedRow = table.getSelectedRow();
+                        if (selectedRow != -1) {
+                            sshFileTableModel.setValueAt(null, selectedRow, 0);
+                            if (sshFileTableModel.getRowCount() > 0) {
+                                int newSelectedRow = selectedRow - 1;
+                                if (newSelectedRow < 0) {
+                                    table.getSelectionModel().setSelectionInterval(0, 0);
+                                } else {
+                                    table.getSelectionModel().setSelectionInterval(newSelectedRow, newSelectedRow);
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+        }
+
+        private Action actionReloadTable() {
+            return new AbstractAction() {
+                {
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Обновить таблицу");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Обновить таблицу");
+                    putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/arrow-circle.png")));
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        sshFileTableModel.reload();
+                    });
+                }
+            };
+        }
+
+        private Action actionSaveTable() {
+            return new AbstractAction() {
+                {
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Сохранить таблицу");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Сохранить таблицу");
+                    putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/disk-black.png")));
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        sshFileTableModel.save();
+                    });
+                }
+            };
+        }
+
+        private Action actionCopyRow() {
+            return new AbstractAction() {
+                {
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Дублировать выделенную строку");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Дублировать выделенную строку");
+                    putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/blue-document-copy.png")));
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        int selectedRow = table.getSelectedRow();
+                        if (selectedRow != -1) {
+                            SshDownloadFile downloadFile = sshFileTableModel.getBy(selectedRow);
+                            SshDownloadFile copyDownloadFile = new SshDownloadFile(
+                                    downloadFile.getDescription(),
+                                    downloadFile.getHost(),
+                                    downloadFile.getPort(),
+                                    downloadFile.getUsername(),
+                                    downloadFile.getPathToPrivateKey(),
+                                    downloadFile.getPassphrase(),
+                                    downloadFile.getFileFrom(),
+                                    downloadFile.getFileTo()
+                            );
+                            sshFileTableModel.setValueAt(copyDownloadFile, sshFileTableModel.getRowCount(), 0);
+                            int last = sshFileTableModel.getRowCount() - 1;
+                            table.getSelectionModel().setSelectionInterval(last, last);
+                        }
+                    });
+                }
+            };
         }
     }
 
