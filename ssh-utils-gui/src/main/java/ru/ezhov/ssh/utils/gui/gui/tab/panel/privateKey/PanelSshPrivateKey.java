@@ -66,45 +66,43 @@ public class PanelSshPrivateKey extends JPanel {
             toolBar.add(actionCopyRow());
 
             buttonExecute.addActionListener(e -> {
-                class DownloadSwingInvoker extends SwingWorker<String, String> {
-                    private SshDownloadFile valueAt;
+                SwingUtilities.invokeLater(() -> {
+                    int selectedRow = table.getSelectedRow();
+                    SshDownloadFile valueAt = sshFileTableModel.getBy(selectedRow);
+                    class DownloadSwingInvoker extends SwingWorker<String, String> {
 
-                    public DownloadSwingInvoker() {
-                        int selectedRow = table.getSelectedRow();
-                        valueAt = sshFileTableModel.getBy(selectedRow);
-                    }
-
-                    @Override
-                    protected String doInBackground() throws Exception {
-                        try {
-                            publish("Скачивание файла: '" + valueAt.getFileFrom() + "' в '" + valueAt.getFileTo() + "'... ");
-                            SshAction sshAction = SshActionFactory.downloadFileAction(
-                                    valueAt.getUsername(),
-                                    valueAt.getHost(),
-                                    Integer.valueOf(valueAt.getPort()),
-                                    valueAt.getPathToPrivateKey(),
-                                    valueAt.getPassphrase(),
-                                    valueAt.getFileFrom(),
-                                    valueAt.getFileTo()
-                            );
-                            sshAction.perform();
-                            publish("Скачивание файла '" + valueAt.getFileFrom() + "' в '" + valueAt.getFileTo() + "' завершено");
-                        } catch (Exception e1) {
-                            e1.printStackTrace();
-                            publish(stackTrace(e1));
+                        @Override
+                        protected String doInBackground() throws Exception {
+                            try {
+                                publish("Скачивание файла: '" + valueAt.getFileFrom() + "' в '" + valueAt.getFileTo() + "'... ");
+                                SshAction sshAction = SshActionFactory.downloadFileAction(
+                                        valueAt.getUsername(),
+                                        valueAt.getHost(),
+                                        Integer.valueOf(valueAt.getPort()),
+                                        valueAt.getPathToPrivateKey(),
+                                        valueAt.getPassphrase(),
+                                        valueAt.getFileFrom(),
+                                        valueAt.getFileTo()
+                                );
+                                sshAction.perform();
+                                publish("Скачивание файла '" + valueAt.getFileFrom() + "' в '" + valueAt.getFileTo() + "' завершено");
+                            } catch (Exception e1) {
+                                e1.printStackTrace();
+                                publish(stackTrace(e1));
+                            }
+                            return null;
                         }
-                        return null;
-                    }
 
-                    @Override
-                    protected void process(List<String> chunks) {
-                        for (String s : chunks) {
-                            panelFilesLog.addToLog(s);
+                        @Override
+                        protected void process(List<String> chunks) {
+                            for (String s : chunks) {
+                                panelFilesLog.addToLog(s);
+                            }
                         }
                     }
-                }
-                DownloadSwingInvoker downloadSwingInvoker = new DownloadSwingInvoker();
-                downloadSwingInvoker.run();
+                    DownloadSwingInvoker downloadSwingInvoker = new DownloadSwingInvoker();
+                    downloadSwingInvoker.run();
+                });
             });
         }
 
