@@ -9,6 +9,7 @@ public class SshFileTableRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         String text = String.valueOf(value);
+        label.setToolTipText("");
         switch (column) {
             case 4:
             case 5:
@@ -20,6 +21,7 @@ public class SshFileTableRenderer extends DefaultTableCellRenderer {
                 break;
             default:
                 label.setText(text);
+                label.setToolTipText(text);
         }
 
         return label;

@@ -52,6 +52,13 @@ public class PanelSshPrivateKey extends JPanel {
             table.setDefaultRenderer(Object.class, new SshFileTableRenderer());
             table.setCellEditor(new DefaultCellEditor(new JTextField()));
 
+            table.getColumn("Название").setMinWidth(150);
+            table.getColumn("Название").setPreferredWidth(150);
+            table.getColumn("Файл для скачивания").setMinWidth(150);
+            table.getColumn("Файл для скачивания").setPreferredWidth(200);
+            table.getColumn("Файл для скачивания").setMinWidth(150);
+            table.getColumn("Файл для сохранения").setPreferredWidth(200);
+
             add(new JScrollPane(table), BorderLayout.CENTER);
 
             add(toolBar, BorderLayout.NORTH);
