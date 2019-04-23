@@ -46,6 +46,7 @@ public class PanelSshPrivateKey extends JPanel {
             setLayout(new BorderLayout());
             toolBar = new JToolBar();
             toolBarActionDownload = new JToolBar(JToolBar.VERTICAL);
+            toolBarActionDownload.setFloatable(false);
             sshFileTableModel = new SshFileTableModel(configRepository);
             table = new JTable(sshFileTableModel);
             table.setDefaultRenderer(Object.class, new SshFileTableRenderer());
