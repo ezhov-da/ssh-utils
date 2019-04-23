@@ -12,7 +12,11 @@ public class SshFileTableRenderer extends DefaultTableCellRenderer {
         switch (column) {
             case 4:
             case 5:
-                label.setText("××××××");
+                if ("".equals(text) || text == null) {
+                    label.setText("");
+                } else {
+                    label.setText("××××××");
+                }
                 break;
             default:
                 label.setText(text);
