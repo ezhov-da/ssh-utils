@@ -38,14 +38,14 @@ public class PanelSshPrivateKey extends JPanel {
 
     private class PanelFiles extends JPanel {
         private JToolBar toolBar;
+        private JToolBar toolBarActionDownload;
         private JTable table;
-        private JButton buttonExecute;
         private SshFileTableModel sshFileTableModel;
 
         PanelFiles() throws ConfigRepositoryException {
             setLayout(new BorderLayout());
             toolBar = new JToolBar();
-            buttonExecute = new JButton("Скачать", new ImageIcon(getClass().getResource("/images/inbox-download.png")));
+            toolBarActionDownload = new JToolBar(JToolBar.VERTICAL);
             sshFileTableModel = new SshFileTableModel(configRepository);
             table = new JTable(sshFileTableModel);
             table.setDefaultRenderer(Object.class, new SshFileTableRenderer());
@@ -53,11 +53,8 @@ public class PanelSshPrivateKey extends JPanel {
 
             add(new JScrollPane(table), BorderLayout.CENTER);
 
-            JPanel panelButtons = new JPanel();
-            panelButtons.add(buttonExecute);
-            add(panelButtons, BorderLayout.SOUTH);
-
             add(toolBar, BorderLayout.NORTH);
+            add(toolBarActionDownload, BorderLayout.EAST);
 
             toolBar.add(actionReloadTable());
             toolBar.add(actionSaveTable());
@@ -65,45 +62,7 @@ public class PanelSshPrivateKey extends JPanel {
             toolBar.add(actionRemoveRow());
             toolBar.add(actionCopyRow());
 
-            buttonExecute.addActionListener(e -> {
-                SwingUtilities.invokeLater(() -> {
-                    int selectedRow = table.getSelectedRow();
-                    SshDownloadFile valueAt = sshFileTableModel.getBy(selectedRow);
-                    class DownloadSwingInvoker extends SwingWorker<String, String> {
-
-                        @Override
-                        protected String doInBackground() throws Exception {
-                            try {
-                                publish("Скачивание файла: '" + valueAt.getFileFrom() + "' в '" + valueAt.getFileTo() + "'... ");
-                                SshAction sshAction = SshActionFactory.downloadFileAction(
-                                        valueAt.getUsername(),
-                                        valueAt.getHost(),
-                                        Integer.valueOf(valueAt.getPort()),
-                                        valueAt.getPathToPrivateKey(),
-                                        valueAt.getPassphrase(),
-                                        valueAt.getFileFrom(),
-                                        valueAt.getFileTo()
-                                );
-                                sshAction.perform();
-                                publish("Скачивание файла '" + valueAt.getFileFrom() + "' в '" + valueAt.getFileTo() + "' завершено");
-                            } catch (Exception e1) {
-                                e1.printStackTrace();
-                                publish(stackTrace(e1));
-                            }
-                            return null;
-                        }
-
-                        @Override
-                        protected void process(List<String> chunks) {
-                            for (String s : chunks) {
-                                panelFilesLog.addToLog(s);
-                            }
-                        }
-                    }
-                    DownloadSwingInvoker downloadSwingInvoker = new DownloadSwingInvoker();
-                    downloadSwingInvoker.run();
-                });
-            });
+            toolBarActionDownload.add(actionDownload());
         }
 
         private Action actionAddRow() {
@@ -212,6 +171,59 @@ public class PanelSshPrivateKey extends JPanel {
                             sshFileTableModel.setValueAt(copyDownloadFile, sshFileTableModel.getRowCount(), 0);
                             int last = sshFileTableModel.getRowCount() - 1;
                             table.getSelectionModel().setSelectionInterval(last, last);
+                        }
+                    });
+                }
+            };
+        }
+
+        private Action actionDownload() {
+            return new AbstractAction() {
+                {
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Скачать выбранные файлы");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Скачать выбранные файлы");
+                    putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/inbox-download.png")));
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        int[] selectedRow = table.getSelectedRows();
+                        for (int r : selectedRow) {
+                            SshDownloadFile valueAt = sshFileTableModel.getBy(r);
+                            class DownloadSwingInvoker extends SwingWorker<String, String> {
+
+                                @Override
+                                protected String doInBackground() throws Exception {
+                                    try {
+                                        publish("Скачивание файла: '" + valueAt.getFileFrom() + "' в '" + valueAt.getFileTo() + "'... ");
+                                        SshAction sshAction = SshActionFactory.downloadFileAction(
+                                                valueAt.getUsername(),
+                                                valueAt.getHost(),
+                                                Integer.valueOf(valueAt.getPort()),
+                                                valueAt.getPathToPrivateKey(),
+                                                valueAt.getPassphrase(),
+                                                valueAt.getFileFrom(),
+                                                valueAt.getFileTo()
+                                        );
+                                        sshAction.perform();
+                                        publish("Скачивание файла '" + valueAt.getFileFrom() + "' в '" + valueAt.getFileTo() + "' завершено");
+                                    } catch (Exception e1) {
+                                        e1.printStackTrace();
+                                        publish(stackTrace(e1));
+                                    }
+                                    return null;
+                                }
+
+                                @Override
+                                protected void process(List<String> chunks) {
+                                    for (String s : chunks) {
+                                        panelFilesLog.addToLog(s);
+                                    }
+                                }
+                            }
+                            DownloadSwingInvoker downloadSwingInvoker = new DownloadSwingInvoker();
+                            downloadSwingInvoker.execute();
                         }
                     });
                 }
