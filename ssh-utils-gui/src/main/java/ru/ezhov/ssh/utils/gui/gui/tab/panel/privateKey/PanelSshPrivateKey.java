@@ -12,7 +12,10 @@ import ru.ezhov.ssh.utils.gui.repositories.ConfigRepositoryFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -41,14 +44,16 @@ public class PanelSshPrivateKey extends JPanel {
     }
 
     private class PanelFiles extends JPanel {
-        private JToolBar toolBarBasic;
+        private JToolBar toolBarTop;
+        private JToolBar toolBarDown;
         private JToolBar toolBarActionDownload;
         private JTable table;
         private SshFileTableModel sshFileTableModel;
 
         PanelFiles() throws ConfigRepositoryException {
             setLayout(new BorderLayout());
-            toolBarBasic = new JToolBar();
+            toolBarTop = new JToolBar();
+            toolBarDown = new JToolBar();
             toolBarActionDownload = new JToolBar(JToolBar.VERTICAL);
             toolBarActionDownload.setFloatable(false);
             sshFileTableModel = new SshFileTableModel(configRepository);
@@ -65,15 +70,50 @@ public class PanelSshPrivateKey extends JPanel {
 
             add(new JScrollPane(table), BorderLayout.CENTER);
 
-            add(toolBarBasic, BorderLayout.NORTH);
+            add(toolBarTop, BorderLayout.NORTH);
             add(toolBarActionDownload, BorderLayout.EAST);
 
-            toolBarBasic.add(actionReloadTable());
-            toolBarBasic.add(actionSaveTable());
-            toolBarBasic.add(actionAddRow());
-            toolBarBasic.add(actionRemoveRow());
-            toolBarBasic.add(actionCopyRow());
-            toolBarBasic.add(Box.createHorizontalGlue());
+            toolBarTop.add(actionReloadTable());
+            toolBarTop.add(actionSaveTable());
+            toolBarTop.add(actionAddRow());
+            toolBarTop.add(actionRemoveRow());
+            toolBarTop.add(actionCopyRow());
+            toolBarTop.add(Box.createHorizontalGlue());
+
+            JLabel labelPathToRepository = new JLabel("Конфигурация: " + pathFile);
+            labelPathToRepository.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        labelPathToRepository.setForeground(Color.BLUE);
+                        labelPathToRepository.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                    });
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        labelPathToRepository.setForeground(Color.BLACK);
+                        labelPathToRepository.setCursor(Cursor.getDefaultCursor());
+                    });
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if (Desktop.isDesktopSupported()) {
+                        try {
+                            Desktop.getDesktop().open(new File(pathFile));
+                        } catch (Exception e1) {
+                            SwingUtilities.invokeLater(() -> {
+                                panelFilesLog.addToLog("Не удалось открыть файл конфигурации.\n" + stackTrace(e1));
+                            });
+                        }
+                    }
+                }
+            });
+            toolBarDown.add(labelPathToRepository);
+            add(toolBarDown, BorderLayout.SOUTH);
+
 
             JCheckBox checkBoxLog = new JCheckBox("Логи");
             checkBoxLog.addActionListener(a -> {
@@ -83,7 +123,7 @@ public class PanelSshPrivateKey extends JPanel {
                     splitPane.setResizeWeight(0.8);
                 });
             });
-            toolBarBasic.add(checkBoxLog);
+            toolBarTop.add(checkBoxLog);
 
             toolBarActionDownload.add(actionDownload());
         }
