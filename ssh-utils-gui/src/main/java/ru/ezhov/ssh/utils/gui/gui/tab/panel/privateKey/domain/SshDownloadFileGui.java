@@ -34,6 +34,10 @@ public class SshDownloadFileGui {
     public static SshDownloadFileGui from(SshDownloadFileGui sshDownloadFileGuiSource) {
         SshDownloadFileGui sshDownloadFileGui = new SshDownloadFileGui();
 
+        sshDownloadFileGui.sshDownloadFile = sshDownloadFileGuiSource.getSshDownloadFile();
+
+        sshDownloadFileGui.setFileStatus(sshDownloadFileGuiSource.getFileStatus());
+
         sshDownloadFileGui.setDescription(sshDownloadFileGuiSource.getDescription());
         sshDownloadFileGui.setHost(sshDownloadFileGuiSource.getHost());
         sshDownloadFileGui.setPort(sshDownloadFileGuiSource.getPort());

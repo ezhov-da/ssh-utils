@@ -20,6 +20,7 @@ import java.util.List;
 public class PanelSshPrivateKey extends JPanel {
 
     private ConfigRepository configRepository;
+    private JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     private PanelFiles panelFiles;
     private PanelFilesLog panelFilesLog;
 
@@ -29,24 +30,22 @@ public class PanelSshPrivateKey extends JPanel {
         panelFilesLog = new PanelFilesLog();
         setLayout(new BorderLayout());
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         splitPane.setOneTouchExpandable(true);
-        splitPane.setDividerLocation(350);
         splitPane.setTopComponent(panelFiles);
         splitPane.setBottomComponent(panelFilesLog);
-
+        panelFilesLog.setVisible(false);
         add(splitPane, BorderLayout.CENTER);
     }
 
     private class PanelFiles extends JPanel {
-        private JToolBar toolBar;
+        private JToolBar toolBarBasic;
         private JToolBar toolBarActionDownload;
         private JTable table;
         private SshFileTableModel sshFileTableModel;
 
         PanelFiles() throws ConfigRepositoryException {
             setLayout(new BorderLayout());
-            toolBar = new JToolBar();
+            toolBarBasic = new JToolBar();
             toolBarActionDownload = new JToolBar(JToolBar.VERTICAL);
             toolBarActionDownload.setFloatable(false);
             sshFileTableModel = new SshFileTableModel(configRepository);
@@ -63,14 +62,25 @@ public class PanelSshPrivateKey extends JPanel {
 
             add(new JScrollPane(table), BorderLayout.CENTER);
 
-            add(toolBar, BorderLayout.NORTH);
+            add(toolBarBasic, BorderLayout.NORTH);
             add(toolBarActionDownload, BorderLayout.EAST);
 
-            toolBar.add(actionReloadTable());
-            toolBar.add(actionSaveTable());
-            toolBar.add(actionAddRow());
-            toolBar.add(actionRemoveRow());
-            toolBar.add(actionCopyRow());
+            toolBarBasic.add(actionReloadTable());
+            toolBarBasic.add(actionSaveTable());
+            toolBarBasic.add(actionAddRow());
+            toolBarBasic.add(actionRemoveRow());
+            toolBarBasic.add(actionCopyRow());
+            toolBarBasic.add(Box.createHorizontalGlue());
+
+            JCheckBox checkBoxLog = new JCheckBox("Логи");
+            checkBoxLog.addActionListener(a -> {
+                SwingUtilities.invokeLater(() -> {
+                    panelFilesLog.setVisible(checkBoxLog.isSelected());
+                    splitPane.setDividerLocation(0.8);
+                    splitPane.setResizeWeight(0.8);
+                });
+            });
+            toolBarBasic.add(checkBoxLog);
 
             toolBarActionDownload.add(actionDownload());
         }
@@ -107,11 +117,10 @@ public class PanelSshPrivateKey extends JPanel {
                         if (selectedRow != -1) {
                             sshFileTableModel.setValueAt(null, selectedRow, 0);
                             if (sshFileTableModel.getRowCount() > 0) {
-                                int newSelectedRow = selectedRow - 1;
-                                if (newSelectedRow < 0) {
+                                if (selectedRow > table.getRowCount()) {
                                     table.getSelectionModel().setSelectionInterval(0, 0);
                                 } else {
-                                    table.getSelectionModel().setSelectionInterval(newSelectedRow, newSelectedRow);
+                                    table.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
                                 }
                             }
                         }
@@ -256,6 +265,8 @@ public class PanelSshPrivateKey extends JPanel {
         private JToolBar toolBar = new JToolBar();
 
         PanelFilesLog() {
+            setBorder(BorderFactory.createTitledBorder("Логи"));
+
             toolBar.add(actionClearLog());
             setLayout(new BorderLayout());
             textPaneLog = new JTextPane();

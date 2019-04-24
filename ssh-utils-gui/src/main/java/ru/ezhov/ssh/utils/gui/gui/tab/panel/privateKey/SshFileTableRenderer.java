@@ -31,24 +31,30 @@ public class SshFileTableRenderer extends DefaultTableCellRenderer {
                 } else {
                     text = "××××××";
                 }
+                toolTipText = "";
                 break;
             case 7:
                 switch (sshDownloadFileGui.getFileStatus()) {
                     case EXISTS:
                         label.setIcon(iconExists);
                         text = text + " (" + sshDownloadFileGui.readableFileSize() + ")";
+                        toolTipText = "Файл существует";
                         break;
                     case NOT_EXISTS:
                         label.setIcon(iconNotExists);
+                        toolTipText = "Файл не существует";
                         break;
                     case EMPTY_VALUE:
                         label.setIcon(null);
+                        toolTipText = "Файл не объявлен";
                         break;
                     case DOWNLOAD:
                         label.setIcon(iconDownload);
+                        toolTipText = "Файл загружается";
                         break;
                     case DOWNLOAD_WITH_ERROR:
                         label.setIcon(iconDownloadWithError);
+                        toolTipText = "Загрузка файла прошла с ошибками";
                         break;
                 }
                 break;
