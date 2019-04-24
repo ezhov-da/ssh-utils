@@ -2,8 +2,6 @@ package ru.ezhov.ssh.utils.gui.gui.tab.panel.privateKey.domain;
 
 import ru.ezhov.ssh.utils.gui.domain.SshDownloadFile;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.text.DecimalFormat;
 

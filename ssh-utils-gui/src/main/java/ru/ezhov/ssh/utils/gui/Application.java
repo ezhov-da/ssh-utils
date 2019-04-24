@@ -1,6 +1,6 @@
 package ru.ezhov.ssh.utils.gui;
 
-import ru.ezhov.ssh.utils.gui.gui.tab.panel.privateKey.PanelSshPrivateKey;
+import ru.ezhov.ssh.utils.gui.gui.tab.panel.privateKey.SshPanelPrivateKey;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,9 +18,9 @@ public class Application {
 
             try {
                 JTabbedPane tabbedPane = new JTabbedPane();
-                PanelSshPrivateKey panelSshPrivateKey = new PanelSshPrivateKey();
+                SshPanelPrivateKey sshPanelPrivateKey = new SshPanelPrivateKey();
 
-                tabbedPane.addTab("Скачивание файлов с серверов", panelSshPrivateKey);
+                tabbedPane.addTab("Скачивание файлов с серверов", sshPanelPrivateKey);
 
                 JFrame frame = new JFrame("SSH Utils");
 

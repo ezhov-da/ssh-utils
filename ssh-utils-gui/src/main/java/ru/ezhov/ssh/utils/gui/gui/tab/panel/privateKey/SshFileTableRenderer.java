@@ -10,7 +10,7 @@ import java.awt.*;
 public class SshFileTableRenderer extends DefaultTableCellRenderer {
     private Icon iconExists = new ImageIcon(getClass().getResource("/images/exists_16x16.png"));
     private Icon iconNotExists = new ImageIcon(getClass().getResource("/images/not_exists_16x16.png"));
-    private Icon iconDownload = new AnimatedIcon(new ImageIcon(getClass().getResource("/images/wait_16x16.gif")));
+    private Icon iconWaite = new AnimatedIcon(new ImageIcon(getClass().getResource("/images/wait_16x16.gif")));
     private Icon iconDownloadWithError = new ImageIcon(getClass().getResource("/images/error_16x16.png"));
 
     @Override
@@ -49,8 +49,12 @@ public class SshFileTableRenderer extends DefaultTableCellRenderer {
                         toolTipText = "Файл не объявлен";
                         break;
                     case DOWNLOAD:
-                        label.setIcon(iconDownload);
+                        label.setIcon(iconWaite);
                         toolTipText = "Файл загружается";
+                        break;
+                    case DELETED:
+                        label.setIcon(iconWaite);
+                        toolTipText = "Файл удаляется";
                         break;
                     case DOWNLOAD_WITH_ERROR:
                         label.setIcon(iconDownloadWithError);

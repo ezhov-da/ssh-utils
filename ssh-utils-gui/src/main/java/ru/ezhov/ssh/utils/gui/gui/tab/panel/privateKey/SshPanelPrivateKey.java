@@ -15,14 +15,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class PanelSshPrivateKey extends JPanel {
+public class SshPanelPrivateKey extends JPanel {
 
     private ConfigRepository configRepository;
     private JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -30,7 +29,7 @@ public class PanelSshPrivateKey extends JPanel {
     private PanelFilesLog panelFilesLog;
     private String pathFile = System.getProperty("user.home") + File.separator + "ssh-files-download-with-private-key-store.xml";
 
-    public PanelSshPrivateKey() throws ConfigRepositoryException {
+    public SshPanelPrivateKey() throws ConfigRepositoryException {
         this.configRepository = ConfigRepositoryFactory.createFromFile(new File(pathFile));
         panelFiles = new PanelFiles();
         panelFilesLog = new PanelFilesLog();
@@ -126,6 +125,7 @@ public class PanelSshPrivateKey extends JPanel {
             toolBarTop.add(checkBoxLog);
 
             toolBarActionDownload.add(actionDownload());
+            toolBarActionDownload.add(actionDeleteFile());
         }
 
         private Action actionAddRow() {
@@ -289,6 +289,73 @@ public class PanelSshPrivateKey extends JPanel {
                             }
                             DownloadSwingInvoker downloadSwingInvoker = new DownloadSwingInvoker();
                             downloadSwingInvoker.execute();
+                        }
+                    });
+                }
+            };
+        }
+
+        private Action actionDeleteFile() {
+            return new AbstractAction() {
+                {
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Удалить с диска выбранные файлы");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Удалить с диска выбранные файлы");
+                    putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/trash-can-delete_16x16.png")));
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        int[] selectedRow = table.getSelectedRows();
+
+                        int confirmDialog = JOptionPane.showConfirmDialog(PanelFiles.this, "Будет удалено " + selectedRow.length + " файлов(а). Продолжить?", "Удаление файлов", JOptionPane.YES_NO_OPTION);
+                        if (confirmDialog != JOptionPane.YES_OPTION) {
+                            return;
+                        }
+
+                        for (int r : selectedRow) {
+                            SshDownloadFileGui valueAt = sshFileTableModel.getBy(r);
+                            class DeletedFileSwingInvoker extends SwingWorker<String, String> {
+
+                                @Override
+                                protected String doInBackground() throws Exception {
+                                    try {
+                                        String fileTo = valueAt.getFileTo();
+                                        publish("Удаление файла: '" + fileTo);
+                                        publish("start_deleting");
+                                        if (fileTo != null && !"".equals(fileTo)) {
+                                            File file = new File(fileTo);
+                                            boolean delete = file.delete();
+                                            if (delete) {
+                                                publish("Файл: '" + fileTo + " удален.");
+                                            } else {
+                                                publish("Не удалось удалить файл: '" + fileTo + "");
+                                            }
+                                        }
+                                        publish("end_deleting");
+                                    } catch (Exception e1) {
+                                        e1.printStackTrace();
+                                        publish(stackTrace(e1));
+                                    }
+                                    return null;
+                                }
+
+                                @Override
+                                protected void process(List<String> chunks) {
+                                    for (String s : chunks) {
+                                        if ("start_deleting".equals(s)) {
+                                            valueAt.setFileStatus(FileStatus.DELETED);
+                                        } else if ("end_deleting".equals(s)) {
+                                            valueAt.updateStatus();
+                                        } else {
+                                            panelFilesLog.addToLog(s);
+                                        }
+                                    }
+                                    table.repaint();
+                                }
+                            }
+                            DeletedFileSwingInvoker deletedFileSwingInvoker = new DeletedFileSwingInvoker();
+                            deletedFileSwingInvoker.execute();
                         }
                     });
                 }
