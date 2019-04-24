@@ -58,7 +58,7 @@ public class PanelSshPrivateKey extends JPanel {
             table.getColumn("Название").setPreferredWidth(150);
             table.getColumn("Файл для скачивания").setMinWidth(150);
             table.getColumn("Файл для скачивания").setPreferredWidth(200);
-            table.getColumn("Файл для скачивания").setMinWidth(150);
+            table.getColumn("Файл для сохранения").setMinWidth(150);
             table.getColumn("Файл для сохранения").setPreferredWidth(200);
 
             add(new JScrollPane(table), BorderLayout.CENTER);
@@ -78,8 +78,8 @@ public class PanelSshPrivateKey extends JPanel {
         private Action actionAddRow() {
             return new AbstractAction() {
                 {
-                    putValue(AbstractAction.SHORT_DESCRIPTION, "Добавить строку");
-                    putValue(AbstractAction.LONG_DESCRIPTION, "Добавить строку");
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Добавить файл");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Добавить файл");
                     putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/layer--plus.png")));
                 }
 
@@ -95,8 +95,8 @@ public class PanelSshPrivateKey extends JPanel {
         private Action actionRemoveRow() {
             return new AbstractAction() {
                 {
-                    putValue(AbstractAction.SHORT_DESCRIPTION, "Удалить строку");
-                    putValue(AbstractAction.LONG_DESCRIPTION, "Удалить строку");
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Удалить файл");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Удалить файл");
                     putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/layer--minus.png")));
                 }
 
@@ -123,8 +123,8 @@ public class PanelSshPrivateKey extends JPanel {
         private Action actionReloadTable() {
             return new AbstractAction() {
                 {
-                    putValue(AbstractAction.SHORT_DESCRIPTION, "Обновить таблицу");
-                    putValue(AbstractAction.LONG_DESCRIPTION, "Обновить таблицу");
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Обновить данные");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Обновить данные");
                     putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/arrow-circle.png")));
                 }
 
@@ -140,8 +140,8 @@ public class PanelSshPrivateKey extends JPanel {
         private Action actionSaveTable() {
             return new AbstractAction() {
                 {
-                    putValue(AbstractAction.SHORT_DESCRIPTION, "Сохранить таблицу");
-                    putValue(AbstractAction.LONG_DESCRIPTION, "Сохранить таблицу");
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Сохранить данные");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Сохранить данные");
                     putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/disk-black.png")));
                 }
 
