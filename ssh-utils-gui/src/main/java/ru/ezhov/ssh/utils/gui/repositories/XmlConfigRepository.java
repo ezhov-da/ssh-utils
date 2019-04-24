@@ -14,7 +14,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XmlConfigRepository implements ConfigRepository {
+class XmlConfigRepository implements ConfigRepository {
     private File source;
 
     public XmlConfigRepository(File source) throws ConfigRepositoryException {

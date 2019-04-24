@@ -7,10 +7,12 @@ import ru.ezhov.ssh.utils.gui.gui.tab.panel.privateKey.domain.FileStatus;
 import ru.ezhov.ssh.utils.gui.gui.tab.panel.privateKey.domain.SshDownloadFileGui;
 import ru.ezhov.ssh.utils.gui.repositories.ConfigRepository;
 import ru.ezhov.ssh.utils.gui.repositories.ConfigRepositoryException;
+import ru.ezhov.ssh.utils.gui.repositories.ConfigRepositoryFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -23,9 +25,10 @@ public class PanelSshPrivateKey extends JPanel {
     private JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     private PanelFiles panelFiles;
     private PanelFilesLog panelFilesLog;
+    private String pathFile = System.getProperty("user.home") + File.separator + "ssh-files-download-with-private-key-store.xml";
 
-    public PanelSshPrivateKey(ConfigRepository configRepository) throws ConfigRepositoryException {
-        this.configRepository = configRepository;
+    public PanelSshPrivateKey() throws ConfigRepositoryException {
+        this.configRepository = ConfigRepositoryFactory.createFromFile(new File(pathFile));
         panelFiles = new PanelFiles();
         panelFilesLog = new PanelFilesLog();
         setLayout(new BorderLayout());
