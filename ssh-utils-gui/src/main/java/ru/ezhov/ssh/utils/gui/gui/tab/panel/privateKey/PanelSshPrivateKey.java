@@ -3,6 +3,8 @@ package ru.ezhov.ssh.utils.gui.gui.tab.panel.privateKey;
 import ru.ezhov.ssh.utils.core.SshAction;
 import ru.ezhov.ssh.utils.core.SshActionFactory;
 import ru.ezhov.ssh.utils.gui.domain.SshDownloadFile;
+import ru.ezhov.ssh.utils.gui.gui.tab.panel.privateKey.domain.FileStatus;
+import ru.ezhov.ssh.utils.gui.gui.tab.panel.privateKey.domain.SshDownloadFileGui;
 import ru.ezhov.ssh.utils.gui.repositories.ConfigRepository;
 import ru.ezhov.ssh.utils.gui.repositories.ConfigRepositoryException;
 
@@ -165,17 +167,8 @@ public class PanelSshPrivateKey extends JPanel {
                     SwingUtilities.invokeLater(() -> {
                         int selectedRow = table.getSelectedRow();
                         if (selectedRow != -1) {
-                            SshDownloadFile downloadFile = sshFileTableModel.getBy(selectedRow);
-                            SshDownloadFile copyDownloadFile = new SshDownloadFile(
-                                    downloadFile.getDescription(),
-                                    downloadFile.getHost(),
-                                    downloadFile.getPort(),
-                                    downloadFile.getUsername(),
-                                    downloadFile.getPathToPrivateKey(),
-                                    downloadFile.getPassphrase(),
-                                    downloadFile.getFileFrom(),
-                                    downloadFile.getFileTo()
-                            );
+                            SshDownloadFileGui downloadFile = sshFileTableModel.getBy(selectedRow);
+                            SshDownloadFileGui copyDownloadFile = SshDownloadFileGui.from(downloadFile);
                             sshFileTableModel.setValueAt(copyDownloadFile, sshFileTableModel.getRowCount(), 0);
                             int last = sshFileTableModel.getRowCount() - 1;
                             table.getSelectionModel().setSelectionInterval(last, last);
@@ -198,12 +191,13 @@ public class PanelSshPrivateKey extends JPanel {
                     SwingUtilities.invokeLater(() -> {
                         int[] selectedRow = table.getSelectedRows();
                         for (int r : selectedRow) {
-                            SshDownloadFile valueAt = sshFileTableModel.getBy(r);
+                            SshDownloadFileGui valueAt = sshFileTableModel.getBy(r);
                             class DownloadSwingInvoker extends SwingWorker<String, String> {
 
                                 @Override
                                 protected String doInBackground() throws Exception {
                                     try {
+                                        publish("start_download");
                                         publish("Скачивание файла: '" + valueAt.getFileFrom() + "' в '" + valueAt.getFileTo() + "'... ");
                                         SshAction sshAction = SshActionFactory.downloadFileAction(
                                                 valueAt.getUsername(),
@@ -215,9 +209,11 @@ public class PanelSshPrivateKey extends JPanel {
                                                 valueAt.getFileTo()
                                         );
                                         sshAction.perform();
+                                        publish("end_download");
                                         publish("Скачивание файла '" + valueAt.getFileFrom() + "' в '" + valueAt.getFileTo() + "' завершено");
                                     } catch (Exception e1) {
                                         e1.printStackTrace();
+                                        publish("error");
                                         publish(stackTrace(e1));
                                     }
                                     return null;
@@ -226,8 +222,17 @@ public class PanelSshPrivateKey extends JPanel {
                                 @Override
                                 protected void process(List<String> chunks) {
                                     for (String s : chunks) {
-                                        panelFilesLog.addToLog(s);
+                                        if ("start_download".equals(s)) {
+                                            valueAt.setFileStatus(FileStatus.DOWNLOAD);
+                                        } else if ("end_download".equals(s)) {
+                                            valueAt.updateStatus();
+                                        } else if ("error".equals(s)) {
+                                            valueAt.setFileStatus(FileStatus.DOWNLOAD_WITH_ERROR);
+                                        } else {
+                                            panelFilesLog.addToLog(s);
+                                        }
                                     }
+                                    table.repaint();
                                 }
                             }
                             DownloadSwingInvoker downloadSwingInvoker = new DownloadSwingInvoker();

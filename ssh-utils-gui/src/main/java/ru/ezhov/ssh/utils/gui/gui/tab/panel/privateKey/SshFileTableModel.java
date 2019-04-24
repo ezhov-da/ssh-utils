@@ -1,24 +1,35 @@
 package ru.ezhov.ssh.utils.gui.gui.tab.panel.privateKey;
 
 import ru.ezhov.ssh.utils.gui.domain.SshDownloadFile;
+import ru.ezhov.ssh.utils.gui.gui.tab.panel.privateKey.domain.SshDownloadFileGui;
 import ru.ezhov.ssh.utils.gui.repositories.ConfigRepository;
 import ru.ezhov.ssh.utils.gui.repositories.ConfigRepositoryException;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SshFileTableModel extends AbstractTableModel {
 
     private ConfigRepository configRepository;
-    private List<SshDownloadFile> all;
+    private List<SshDownloadFileGui> all;
 
-    public SshFileTableModel(ConfigRepository configRepository) throws ConfigRepositoryException {
+    SshFileTableModel(ConfigRepository configRepository) throws ConfigRepositoryException {
         this.configRepository = configRepository;
-        all = configRepository.all();
+        load();
     }
 
-    public SshDownloadFile getBy(int rowIndex) {
+    private void load() throws ConfigRepositoryException {
+        all = configRepository
+                .all()
+                .stream()
+                .map(SshDownloadFileGui::from)
+                .collect(Collectors.toList());
+
+    }
+
+    SshDownloadFileGui getBy(int rowIndex) {
         return all.get(rowIndex);
     }
 
@@ -58,7 +69,7 @@ public class SshFileTableModel extends AbstractTableModel {
 
     @Override
     public String getValueAt(int rowIndex, int columnIndex) {
-        SshDownloadFile downloadFile = all.get(rowIndex);
+        SshDownloadFileGui downloadFile = all.get(rowIndex);
         String text = "";
         switch (columnIndex) {
             case 0:
@@ -90,9 +101,9 @@ public class SshFileTableModel extends AbstractTableModel {
         return text;
     }
 
-    public void reload() {
+    void reload() {
         try {
-            all = configRepository.all();
+            load();
             fireTableDataChanged();
         } catch (ConfigRepositoryException e) {
             e.printStackTrace();
@@ -105,25 +116,29 @@ public class SshFileTableModel extends AbstractTableModel {
         if (aValue == null) {
             try {
                 all.remove(rowIndex);
-                configRepository.addAll(all);
-                all = configRepository.all();
+                List<SshDownloadFile> collect = all
+                        .stream()
+                        .map(SshDownloadFileGui::getSshDownloadFile)
+                        .collect(Collectors.toList());
+                configRepository.addAll(collect);
+                load();
                 fireTableDataChanged();
             } catch (ConfigRepositoryException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(null, "Ошибка удаления");
             }
-        } else if (aValue instanceof SshDownloadFile) {
-            SshDownloadFile sshDownloadFile = (SshDownloadFile) aValue;
+        } else if (aValue instanceof SshDownloadFileGui) {
+            SshDownloadFileGui sshDownloadFile = (SshDownloadFileGui) aValue;
             try {
-                configRepository.add(sshDownloadFile);
-                all = configRepository.all();
+                configRepository.add(sshDownloadFile.getSshDownloadFile());
+                load();
                 fireTableDataChanged();
             } catch (ConfigRepositoryException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(null, "Ошибка добавления");
             }
         } else {
-            SshDownloadFile downloadFile = all.get(rowIndex);
+            SshDownloadFileGui downloadFile = all.get(rowIndex);
             String value = String.valueOf(aValue);
             switch (columnIndex) {
                 case 0:
@@ -160,10 +175,14 @@ public class SshFileTableModel extends AbstractTableModel {
     }
 
 
-    public void save() {
+    void save() {
         try {
-            configRepository.addAll(all);
-            all = configRepository.all();
+            List<SshDownloadFile> collect = all
+                    .stream()
+                    .map(SshDownloadFileGui::getSshDownloadFile)
+                    .collect(Collectors.toList());
+            configRepository.addAll(collect);
+            load();
             fireTableDataChanged();
         } catch (ConfigRepositoryException e) {
             e.printStackTrace();
