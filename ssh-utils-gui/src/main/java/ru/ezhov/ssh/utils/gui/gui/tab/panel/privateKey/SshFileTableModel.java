@@ -114,6 +114,28 @@ public class SshFileTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if (aValue == null) {
+            removeRow(aValue, rowIndex, columnIndex);
+        } else if (aValue instanceof SshDownloadFileGui) {
+            addRow(aValue, rowIndex, columnIndex);
+        } else {
+            setValue(aValue, rowIndex, columnIndex);
+        }
+        fireTableDataChanged();
+    }
+
+    private void addRow(Object aValue, int rowIndex, int columnIndex) {
+        SshDownloadFileGui sshDownloadFile = (SshDownloadFileGui) aValue;
+        try {
+            configRepository.add(sshDownloadFile.getSshDownloadFile());
+            load();
+        } catch (ConfigRepositoryException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Ошибка добавления");
+        }
+    }
+
+    private void removeRow(Object aValue, int rowIndex, int columnIndex) {
+        if (all.size() > rowIndex) {
             try {
                 all.remove(rowIndex);
                 List<SshDownloadFile> collect = all
@@ -122,50 +144,41 @@ public class SshFileTableModel extends AbstractTableModel {
                         .collect(Collectors.toList());
                 configRepository.addAll(collect);
                 load();
-                fireTableDataChanged();
             } catch (ConfigRepositoryException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(null, "Ошибка удаления");
             }
-        } else if (aValue instanceof SshDownloadFileGui) {
-            SshDownloadFileGui sshDownloadFile = (SshDownloadFileGui) aValue;
-            try {
-                configRepository.add(sshDownloadFile.getSshDownloadFile());
-                load();
-                fireTableDataChanged();
-            } catch (ConfigRepositoryException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Ошибка добавления");
-            }
-        } else {
-            SshDownloadFileGui downloadFile = all.get(rowIndex);
-            String value = String.valueOf(aValue);
-            switch (columnIndex) {
-                case 0:
-                    downloadFile.setDescription(value);
-                    break;
-                case 1:
-                    downloadFile.setHost(value);
-                    break;
-                case 2:
-                    downloadFile.setPort(value);
-                    break;
-                case 3:
-                    downloadFile.setUsername(value);
-                    break;
-                case 4:
-                    downloadFile.setPassphrase(value);
-                    break;
-                case 5:
-                    downloadFile.setPathToPrivateKey(value);
-                    break;
-                case 6:
-                    downloadFile.setFileFrom(value);
-                    break;
-                case 7:
-                    downloadFile.setFileTo(value);
-                    break;
-            }
+        }
+    }
+
+    private void setValue(Object aValue, int rowIndex, int columnIndex) {
+        SshDownloadFileGui downloadFile = all.get(rowIndex);
+        String value = String.valueOf(aValue);
+        switch (columnIndex) {
+            case 0:
+                downloadFile.setDescription(value);
+                break;
+            case 1:
+                downloadFile.setHost(value);
+                break;
+            case 2:
+                downloadFile.setPort(value);
+                break;
+            case 3:
+                downloadFile.setUsername(value);
+                break;
+            case 4:
+                downloadFile.setPassphrase(value);
+                break;
+            case 5:
+                downloadFile.setPathToPrivateKey(value);
+                break;
+            case 6:
+                downloadFile.setFileFrom(value);
+                break;
+            case 7:
+                downloadFile.setFileTo(value);
+                break;
         }
     }
 

@@ -10,7 +10,11 @@ public class SshDownloadFile {
     private String fileTo;
     private String fileFrom;
 
-    public SshDownloadFile() {
+    public static SshDownloadFile createEmpty() {
+        return new SshDownloadFile();
+    }
+
+    private SshDownloadFile() {
     }
 
     public SshDownloadFile(

@@ -139,7 +139,11 @@ public class SshPanelPrivateKey extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     SwingUtilities.invokeLater(() -> {
-                        sshFileTableModel.setValueAt(new SshDownloadFile(), sshFileTableModel.getRowCount(), 0);
+                        sshFileTableModel.setValueAt(
+                                SshDownloadFileGui.from(SshDownloadFile.createEmpty()),
+                                sshFileTableModel.getRowCount(),
+                                0
+                        );
                     });
                 }
             };
@@ -161,7 +165,7 @@ public class SshPanelPrivateKey extends JPanel {
                             sshFileTableModel.setValueAt(null, selectedRow, 0);
                             if (sshFileTableModel.getRowCount() > 0) {
                                 if (selectedRow > table.getRowCount()) {
-                                    table.getSelectionModel().setSelectionInterval(0, 0);
+                                    table.getSelectionModel().setSelectionInterval(table.getRowCount(), table.getRowCount());
                                 } else {
                                     table.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
                                 }
