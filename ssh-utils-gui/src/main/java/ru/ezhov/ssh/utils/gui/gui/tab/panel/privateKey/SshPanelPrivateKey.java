@@ -11,6 +11,10 @@ import ru.ezhov.ssh.utils.gui.repositories.ConfigRepositoryFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -126,13 +130,15 @@ public class SshPanelPrivateKey extends JPanel {
 
             toolBarActionDownload.add(actionDownload());
             toolBarActionDownload.add(actionDeleteFile());
+            toolBarActionDownload.addSeparator();
+            toolBarActionDownload.add(actionCopyPathToBuffer());
         }
 
         private Action actionAddRow() {
             return new AbstractAction() {
                 {
-                    putValue(AbstractAction.SHORT_DESCRIPTION, "Добавить файл");
-                    putValue(AbstractAction.LONG_DESCRIPTION, "Добавить файл");
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Добавить файл в список");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Добавить файл в список");
                     putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/layer--plus.png")));
                 }
 
@@ -152,8 +158,8 @@ public class SshPanelPrivateKey extends JPanel {
         private Action actionRemoveRow() {
             return new AbstractAction() {
                 {
-                    putValue(AbstractAction.SHORT_DESCRIPTION, "Удалить файл");
-                    putValue(AbstractAction.LONG_DESCRIPTION, "Удалить файл");
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Удалить файл из списка");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Удалить файл из списка");
                     putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/layer--minus.png")));
                 }
 
@@ -179,8 +185,8 @@ public class SshPanelPrivateKey extends JPanel {
         private Action actionReloadTable() {
             return new AbstractAction() {
                 {
-                    putValue(AbstractAction.SHORT_DESCRIPTION, "Обновить данные");
-                    putValue(AbstractAction.LONG_DESCRIPTION, "Обновить данные");
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Обновить список");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Обновить список");
                     putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/arrow-circle.png")));
                 }
 
@@ -196,8 +202,8 @@ public class SshPanelPrivateKey extends JPanel {
         private Action actionSaveTable() {
             return new AbstractAction() {
                 {
-                    putValue(AbstractAction.SHORT_DESCRIPTION, "Сохранить данные");
-                    putValue(AbstractAction.LONG_DESCRIPTION, "Сохранить данные");
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Сохранить список");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Сохранить список");
                     putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/disk-black.png")));
                 }
 
@@ -360,6 +366,37 @@ public class SshPanelPrivateKey extends JPanel {
                             }
                             DeletedFileSwingInvoker deletedFileSwingInvoker = new DeletedFileSwingInvoker();
                             deletedFileSwingInvoker.execute();
+                        }
+                    });
+                }
+            };
+        }
+
+        private Action actionCopyPathToBuffer() {
+            return new AbstractAction() {
+                {
+                    putValue(AbstractAction.SHORT_DESCRIPTION, "Скопировать пути выбранных файлов в буфер");
+                    putValue(AbstractAction.LONG_DESCRIPTION, "Скопировать пути выбранных файлов в буфер");
+                    putValue(AbstractAction.SMALL_ICON, new ImageIcon(getClass().getResource("/images/copy_path_ doc_16x16.png")));
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        int[] selectedRow = table.getSelectedRows();
+                        StringBuilder stringBuilder = new StringBuilder();
+                        for (int r : selectedRow) {
+                            SshDownloadFileGui valueAt = sshFileTableModel.getBy(r);
+                            try {
+                                String fileTo = valueAt.getFileTo();
+                                stringBuilder.append(fileTo).append("\n");
+                                String filesTo = stringBuilder.toString().trim();
+                                StringSelection stringSelection = new StringSelection(filesTo);
+                                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                                clipboard.setContents(stringSelection, null);
+                            } catch (Exception e1) {
+                                e1.printStackTrace();
+                            }
                         }
                     });
                 }
