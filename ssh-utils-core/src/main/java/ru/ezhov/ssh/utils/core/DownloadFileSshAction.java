@@ -18,6 +18,18 @@ class DownloadFileSshAction implements SshAction {
     private String passphrase;
     private String fileFrom;
     private String fileTo;
+    private DownloadProgressListener downloadProgressListener = null;
+
+    DownloadFileSshAction(String username, String host, int port, String pathToPrivateKey, String passphrase, String fileFrom, String fileTo, DownloadProgressListener downloadProgressListener) {
+        this.username = username;
+        this.host = host;
+        this.port = port;
+        this.pathToPrivateKey = pathToPrivateKey;
+        this.passphrase = passphrase;
+        this.fileFrom = fileFrom;
+        this.fileTo = fileTo;
+        this.downloadProgressListener = downloadProgressListener;
+    }
 
     DownloadFileSshAction(String username, String host, int port, String pathToPrivateKey, String passphrase, String fileFrom, String fileTo) {
         this.username = username;
@@ -47,8 +59,12 @@ class DownloadFileSshAction implements SshAction {
                 try (BufferedInputStream inputStream = new BufferedInputStream(c.get(fileFrom), 1024)) {
                     try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(new File(fileTo)))) {
                         byte[] buf = new byte[1024];
-                        while (inputStream.read(buf) != -1) {
-                            outputStream.write(buf);
+                        int read;
+                        while ((read = inputStream.read(buf)) != -1) {
+                            outputStream.write(buf, 0, read);
+                            if (downloadProgressListener != null) {
+                                downloadProgressListener.progress(read);
+                            }
                         }
                     }
                 }
