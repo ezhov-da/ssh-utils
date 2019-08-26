@@ -2,28 +2,18 @@ package ru.ezhov.ssh.utils.client.gui.tab.panel;
 
 import ru.ezhov.ssh.utils.client.gui.tab.panel.model.SshFileTableModel;
 import ru.ezhov.ssh.utils.client.gui.tab.panel.renderer.SshFileTableRenderer;
-import ru.ezhov.ssh.utils.core.SshAction;
-import ru.ezhov.ssh.utils.core.SshActionFactory;
-import ru.ezhov.ssh.utils.client.model.configuration.domain.SshDownloadFile;
-import ru.ezhov.ssh.utils.client.gui.tab.panel.domain.FileStatus;
-import ru.ezhov.ssh.utils.client.gui.tab.panel.domain.SshDownloadFileGui;
+import ru.ezhov.ssh.utils.client.infrastructure.ApplicationProperties;
+import ru.ezhov.ssh.utils.client.infrastructure.configuration.repository.ConfigRepositoryFactory;
 import ru.ezhov.ssh.utils.client.model.configuration.repository.ConfigRepository;
 import ru.ezhov.ssh.utils.client.model.configuration.repository.ConfigRepositoryException;
-import ru.ezhov.ssh.utils.client.infrastructure.configuration.repository.ConfigRepositoryFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 public class SshPanel extends JPanel {
 
@@ -31,7 +21,7 @@ public class SshPanel extends JPanel {
     private JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     private PanelFiles panelFiles;
     private PanelFilesLog panelFilesLog;
-    private String pathFile = System.getProperty("user.home") + File.separator + "ssh-files-download-with-private-key-store.xml";
+    private String pathFile = ApplicationProperties.DEFAULT_XML_STORE;
 
     public SshPanel() throws ConfigRepositoryException {
         this.configRepository = ConfigRepositoryFactory.createFromFile(new File(pathFile));

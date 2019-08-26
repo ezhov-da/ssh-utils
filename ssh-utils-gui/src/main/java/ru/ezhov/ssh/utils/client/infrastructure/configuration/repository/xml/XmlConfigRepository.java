@@ -1,22 +1,19 @@
-package ru.ezhov.ssh.utils.client.infrastructure.configuration.repository;
+package ru.ezhov.ssh.utils.client.infrastructure.configuration.repository.xml;
 
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import ru.ezhov.ssh.utils.client.infrastructure.ApplicationProperties;
+import ru.ezhov.ssh.utils.client.infrastructure.configuration.repository.xml.versioned.VersionedCheckerException;
+import ru.ezhov.ssh.utils.client.infrastructure.configuration.repository.xml.versioned.VersionedReaderFactory;
 import ru.ezhov.ssh.utils.client.model.configuration.domain.SshDownloadFile;
 import ru.ezhov.ssh.utils.client.model.configuration.repository.ConfigRepository;
 import ru.ezhov.ssh.utils.client.model.configuration.repository.ConfigRepositoryException;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class XmlConfigRepository implements ConfigRepository {
+public class XmlConfigRepository implements ConfigRepository {
     private File source;
 
     public XmlConfigRepository(File source) throws ConfigRepositoryException {
@@ -51,7 +48,8 @@ class XmlConfigRepository implements ConfigRepository {
         try (OutputStream outputStream = new FileOutputStream(source)) {
             XMLStreamWriter xsw = XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream, "UTF-8");
             xsw.writeStartDocument("UTF-8", "1.0");
-            xsw.writeStartElement("ssh-files-download-with-private-key");
+            xsw.writeStartElement("ssh-utils");
+            xsw.writeAttribute("version", "1");
             xsw.writeStartElement("files");
             for (SshDownloadFile sshDownloadFile : sshDownloadFiles) {
                 xsw.writeStartElement("file");
@@ -91,7 +89,7 @@ class XmlConfigRepository implements ConfigRepository {
                 xsw.writeEndElement(); //file
             }
             xsw.writeEndElement(); //files
-            xsw.writeEndElement(); //ssh-files-download-with-private-key
+            xsw.writeEndElement(); //ssh-utils
             xsw.writeEndDocument();
         } catch (Exception e) {
             throw new ConfigRepositoryException(e);
@@ -99,70 +97,15 @@ class XmlConfigRepository implements ConfigRepository {
     }
 
     private List<SshDownloadFile> read(File source) throws ConfigRepositoryException {
-        List<SshDownloadFile> sshDownloadFiles = new ArrayList<>();
-        try (InputStream ins = new FileInputStream(source)) {
-            XPath xPath = XPathFactory.newInstance().newXPath();
-            NodeList nodeList = (NodeList) xPath.evaluate("//ssh-files-download-with-private-key/files/file", new InputSource(ins), XPathConstants.NODESET);
-            int length = nodeList.getLength();
-            for (int i = 0; i < length; i++) {
-                Node item = nodeList.item(i);
-
-                NodeList childNodes = item.getChildNodes();
-                int childNodesLength = childNodes.getLength();
-                String description = "";
-                String host = "";
-                String port = "";
-                String username = "";
-                String pathToPrivateKey = "";
-                String passphrase = "";
-                String fileFrom = "";
-                String fileTo = "";
-                for (int cn = 0; cn < childNodesLength; cn++) {
-                    Node node = childNodes.item(cn);
-                    String value = node.getTextContent().trim();
-                    switch (node.getNodeName()) {
-                        case "description":
-                            description = value;
-                            break;
-                        case "host":
-                            host = value;
-                            break;
-                        case "port":
-                            port = value;
-                            break;
-                        case "username":
-                            username = value;
-                            break;
-                        case "pathToPrivateKey":
-                            pathToPrivateKey = value;
-                            break;
-                        case "passphrase":
-                            passphrase = value;
-                            break;
-                        case "fileFrom":
-                            fileFrom = value;
-                            break;
-                        case "fileTo":
-                            fileTo = value;
-                            break;
-                    }
-                }
-                sshDownloadFiles.add(
-                        new SshDownloadFile(
-                                description,
-                                host,
-                                port,
-                                username,
-                                pathToPrivateKey,
-                                passphrase,
-                                fileFrom,
-                                fileTo
-                        )
-                );
-            }
-            return sshDownloadFiles;
-        } catch (Exception e) {
-            throw new ConfigRepositoryException(e);
+        try {
+            VersionedXmlReader versionedXmlReader = VersionedReaderFactory.byVersion(source);
+            return versionedXmlReader.read();
+        } catch (UnsupportedVersionedXmlReader e) {
+            throw new ConfigRepositoryException("Неподдерживаемая версия конфигурации для файла '" + (source == null ? null : source.getAbsolutePath()) + "'", e);
+        } catch (VersionedXmlReaderException e) {
+            throw new ConfigRepositoryException("Не удалось прочесть конфигурацию определенной версии для файла '" + (source == null ? null : source.getAbsolutePath()) + "'", e);
+        } catch (VersionedCheckerException e) {
+            throw new ConfigRepositoryException("Не удалось определить версию конфигурации для файла '" + (source == null ? null : source.getAbsolutePath()) + "'", e);
         }
     }
 }

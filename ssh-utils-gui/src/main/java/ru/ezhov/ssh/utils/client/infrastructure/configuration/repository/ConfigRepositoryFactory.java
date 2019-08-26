@@ -1,5 +1,6 @@
 package ru.ezhov.ssh.utils.client.infrastructure.configuration.repository;
 
+import ru.ezhov.ssh.utils.client.infrastructure.configuration.repository.xml.XmlConfigRepository;
 import ru.ezhov.ssh.utils.client.model.configuration.repository.ConfigRepository;
 import ru.ezhov.ssh.utils.client.model.configuration.repository.ConfigRepositoryException;
 

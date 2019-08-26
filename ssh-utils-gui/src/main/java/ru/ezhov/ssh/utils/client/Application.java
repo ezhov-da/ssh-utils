@@ -1,6 +1,7 @@
 package ru.ezhov.ssh.utils.client;
 
 import ru.ezhov.ssh.utils.client.gui.tab.panel.SshPanel;
+import ru.ezhov.ssh.utils.client.infrastructure.ApplicationProperties;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,6 +9,9 @@ import java.awt.*;
 public class Application {
 
     public static void main(String[] args) {
+
+        ApplicationProperties.init();
+
         SwingUtilities.invokeLater(() ->
         {
             try {

@@ -2,6 +2,7 @@ package ru.ezhov.ssh.utils.client.infrastructure.configuration.repository;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import ru.ezhov.ssh.utils.client.infrastructure.configuration.repository.xml.XmlConfigRepository;
 import ru.ezhov.ssh.utils.client.model.configuration.domain.SshDownloadFile;
 
 import java.io.File;

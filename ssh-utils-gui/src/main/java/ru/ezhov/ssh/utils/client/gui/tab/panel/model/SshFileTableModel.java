@@ -21,7 +21,7 @@ public class SshFileTableModel extends AbstractTableModel {
     }
 
     private void load() throws ConfigRepositoryException {
-        all = configRepository
+        this.all = configRepository
                 .all()
                 .stream()
                 .map(SshDownloadFileGui::from)
